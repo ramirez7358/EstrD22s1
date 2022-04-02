@@ -83,7 +83,7 @@ vieneDespues Domingo Sabado = True
 vieneDespues Lunes Domingo = True
 vieneDespues _ _ = False
 
-vieneDespues2 :: DiaDeSemana -> DiaDeSemana -> Bool
+vieneDespues2 :: Ord a => a -> a -> Bool
 vieneDespues2 d1 d2 = d1 > d2
 
 -- d --
