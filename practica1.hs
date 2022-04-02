@@ -27,14 +27,17 @@ maxDelPar (n, m) = if(n>m) then n
 -- 1 --
 
 data Dir = Norte | Este | Sur | Oeste
-     deriving Show
+     deriving Eq
+
+equals :: Eq a => a -> a -> Bool
+equals x y = x == y
 
 -- a --
 opuesto :: Dir -> Dir
 opuesto Norte = Sur
 opuesto Este = Oeste
 opuesto Sur = Norte
-opuesto Oeste = Este 
+opuesto Oeste = Este
 
 -- b --
 iguales :: Dir -> Dir -> Bool
@@ -43,6 +46,9 @@ iguales Oeste Oeste = True
 iguales Este Este = True
 iguales Sur Sur = True
 iguales _ _ = False
+
+iguales2 :: Dir -> Dir -> Bool
+iguales2 a b = equals a b
 
 -- c --
 siguiente :: Dir -> Dir
@@ -54,7 +60,7 @@ siguiente Oeste = Norte
 -- 2 --
 
 data DiaDeSemana = Lunes | Martes | Miercoles | Jueves | Viernes | Sabado | Domingo
-     deriving Show
+     deriving (Ord, Eq)
 
 -- a --
 primerYUltimoDia :: (DiaDeSemana, DiaDeSemana)
@@ -76,6 +82,9 @@ vieneDespues Sabado Viernes = True
 vieneDespues Domingo Sabado = True
 vieneDespues Lunes Domingo = True
 vieneDespues _ _ = False
+
+vieneDespues2 :: DiaDeSemana -> DiaDeSemana -> Bool
+vieneDespues2 d1 d2 = d1 > d2
 
 -- d --
 estaEnElMedio :: DiaDeSemana -> Bool
@@ -144,17 +153,13 @@ data Entrenador = E String (Pokemon,Pokemon)
 
 entrenador1 = E "Brian" ((PK Agua 100),(PK Fuego 100))
 entrenador2 = E "Leonel" ((PK Agua 100),(PK Planta 100))
+entrenador3 = E "Debora" (PK Planta 100, PK Planta 99)
 
 pokemonesDe :: Entrenador -> (Pokemon, Pokemon)
 pokemonesDe (E _ pks) = pks
 
 tipoDe :: Pokemon -> TipoDePokemon
 tipoDe (PK tp _) = tp
-
-esTipoDe :: Pokemon -> TipoDePokemon -> Int
-esTipoDe p tp = if tipoDe p == tp 
-                    then 1
-                    else 0
 
 tipoSuperiorA :: TipoDePokemon -> TipoDePokemon -> Bool
 tipoSuperiorA Agua Fuego = True
@@ -166,7 +171,21 @@ superaA :: Pokemon -> Pokemon -> Bool
 superaA (PK t1 _) (PK t2 _) =  tipoSuperiorA t1 t2
 
 cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDe tp e = esTipoDe (fst (pokemonesDe e)) tp + esTipoDe (snd (pokemonesDe e)) tp
+cantidadDePokemonDe tp e = unoSiEsTipo (fst (pokemonesDe e)) tp + unoSiEsTipo (snd (pokemonesDe e)) tp
+
+cantidadDePokemonDe2 :: TipoDePokemon -> Entrenador -> Int
+cantidadDePokemonDe2 tp (E _ (p1,p2)) = unoSiEsTipo p1 tp + unoSiEsTipo p2 tp
+
+unoSiEsTipo :: Pokemon -> TipoDePokemon -> Int
+unoSiEsTipo p tp = if mismoTipo (tipoDe p) tp 
+                    then 1
+                    else 0
+
+mismoTipo :: TipoDePokemon -> TipoDePokemon -> Bool
+mismoTipo Fuego Fuego = True
+mismoTipo Agua Agua = True
+mismoTipo Planta Planta = True
+mismoTipo _ _ = False
 
 juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
 juntarPokemon (e1,e2) = fst(pokemonesDe e1) : fst(pokemonesDe e2) : snd(pokemonesDe e1) : snd(pokemonesDe e2) : []
@@ -181,7 +200,7 @@ siempreSiete :: a -> Int
 siempreSiete a = 7
 
 swap :: (a,b) -> (b,a)
-swap (a,b) = (b,a)
+swap (x,y) = (y,x)
 
 -- Pattern Matching sobre listas --
 -- 5 --
