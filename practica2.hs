@@ -64,18 +64,21 @@ apariciones e (x:xs) = if x == e
                         then 1 + apariciones e xs
                         else apariciones e xs
 
+-- 9 --
 losMenoresA :: Int -> [Int] -> [Int]
 losMenoresA n [] = [] 
 losMenoresA n (x:xs) = if x < n
                         then x : losMenoresA n xs
                         else losMenoresA n xs
 
+-- 10 --
 lasDeLongitudMayorA :: Int -> [[a]] -> [[a]]
 lasDeLongitudMayorA _ [] = [] 
 lasDeLongitudMayorA n (l:ls) = if longitud l > n
                                 then l : lasDeLongitudMayorA n ls
                                 else lasDeLongitudMayorA n ls
 
+-- 11 --
 agregarAlFinal :: [a] -> a -> [a]
 agregarAlFinal [] e = [e]
 agregarAlFinal l e = l ++ [e]
@@ -85,19 +88,23 @@ agregarAlFinal' :: [a] -> a -> [a]
 agregarAlFinal' [] e = [e]
 agregarAlFinal' (x:xs) e = x : agregarAlFinal xs e
 
+-- 12 --
 concatenar :: [a] -> [a] -> [a]
 concatenar [] ys = ys
 concatenar (x:xs) ys = x : concatenar xs ys
 
+-- 13 --
 reversa :: [a] -> [a]
 reversa [] = [] 
 reversa (x:xs) = agregarAlFinal (reversa xs) x
 
+-- 14 --
 zipMaximos :: [Int] -> [Int] -> [Int]
 zipMaximos [] _ = []
 zipMaximos _ [] = []
 zipMaximos (x:xs) (y:ys) = maxDelPar (x,y) : zipMaximos xs ys
 
+-- 15 --
 elMinimo :: Ord a => [a] -> a
 elMinimo [x] = x
 elMinimo (x:xs) = min x (elMinimo xs)
