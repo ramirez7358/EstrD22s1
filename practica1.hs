@@ -74,13 +74,13 @@ empiezaConM _ = False
 
 -- c --
 numeroDeDia :: DiaDeSemana -> Int
-numeroDeDia Domingo = 0
 numeroDeDia Lunes = 1
 numeroDeDia Martes = 2
 numeroDeDia Miercoles = 3
 numeroDeDia Jueves = 4
 numeroDeDia Viernes = 5
 numeroDeDia Sabado = 6
+numeroDeDia Domingo = 7
 
 vieneDespues :: DiaDeSemana -> DiaDeSemana -> Bool
 vieneDespues d1 d2 = numeroDeDia d1 > numeroDeDia d2
