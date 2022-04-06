@@ -73,18 +73,17 @@ empiezaConM Miercoles = True
 empiezaConM _ = False
 
 -- c --
-vieneDespues :: DiaDeSemana -> DiaDeSemana -> Bool
-vieneDespues Martes Lunes = True
-vieneDespues Miercoles Martes = True
-vieneDespues Jueves Miercoles = True
-vieneDespues Viernes Jueves = True
-vieneDespues Sabado Viernes = True
-vieneDespues Domingo Sabado = True
-vieneDespues Lunes Domingo = True
-vieneDespues _ _ = False
+numeroDeDia :: DiaDeSemana -> Int
+numeroDeDia Domingo = 0
+numeroDeDia Lunes = 1
+numeroDeDia Martes = 2
+numeroDeDia Miercoles = 3
+numeroDeDia Jueves = 4
+numeroDeDia Viernes = 5
+numeroDeDia Sabado = 6
 
-vieneDespues2 :: Ord a => a -> a -> Bool
-vieneDespues2 d1 d2 = d1 > d2
+vieneDespues :: DiaDeSemana -> DiaDeSemana -> Bool
+vieneDespues d1 d2 = numeroDeDia d1 > numeroDeDia d2
 
 -- d --
 estaEnElMedio :: DiaDeSemana -> Bool
