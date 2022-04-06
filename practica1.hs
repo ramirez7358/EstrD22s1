@@ -147,15 +147,15 @@ data TipoDePokemon = Agua | Fuego | Planta
 data Pokemon = PK TipoDePokemon Int
      deriving Show
 
-data Entrenador = E String (Pokemon,Pokemon)
+data Entrenador = E String Pokemon Pokemon
      deriving Show
 
-entrenador1 = E "Brian" ((PK Agua 100),(PK Fuego 100))
-entrenador2 = E "Leonel" ((PK Agua 100),(PK Planta 100))
-entrenador3 = E "Debora" (PK Planta 100, PK Planta 99)
+entrenador1 = E "Brian" (PK Agua 100) (PK Fuego 100)
+entrenador2 = E "Leonel" (PK Agua 100) (PK Planta 100)
+entrenador3 = E "Debora" (PK Planta 100) (PK Planta 99)
 
 pokemonesDe :: Entrenador -> (Pokemon, Pokemon)
-pokemonesDe (E _ pks) = pks
+pokemonesDe (E _ pk1 pk2) = (pk1, pk2)
 
 tipoDe :: Pokemon -> TipoDePokemon
 tipoDe (PK tp _) = tp
@@ -173,7 +173,7 @@ cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
 cantidadDePokemonDe tp e = unoSiEsTipo (fst (pokemonesDe e)) tp + unoSiEsTipo (snd (pokemonesDe e)) tp
 
 cantidadDePokemonDe2 :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDe2 tp (E _ (p1,p2)) = unoSiEsTipo p1 tp + unoSiEsTipo p2 tp
+cantidadDePokemonDe2 tp (E _ pk1 pk2) = unoSiEsTipo pk1 tp + unoSiEsTipo pk2 tp
 
 unoSiEsTipo :: Pokemon -> TipoDePokemon -> Int
 unoSiEsTipo p tp = if mismoTipo (tipoDe p) tp 
