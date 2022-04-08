@@ -60,7 +60,6 @@ siguiente Oeste = Norte
 -- 2 --
 
 data DiaDeSemana = Lunes | Martes | Miercoles | Jueves | Viernes | Sabado | Domingo
-     deriving (Ord, Eq)
 
 -- a --
 primerYUltimoDia :: (DiaDeSemana, DiaDeSemana)
@@ -105,13 +104,13 @@ implica _ _ = False
 
 -- c --
 and :: Bool -> Bool -> Bool
-and True True = True
-and _ _ = False
+and True b = b
+and False _ = False
 
 -- d --
 or :: Bool -> Bool -> Bool
-or False False = False
-or _ _ = True
+or False b = b
+or True _ = True
 
 -- Registros --
 -- 1 --
