@@ -152,11 +152,14 @@ entrenador1 = E "Brian" (PK Agua 100) (PK Fuego 100)
 entrenador2 = E "Leonel" (PK Agua 100) (PK Planta 100)
 entrenador3 = E "Debora" (PK Planta 100) (PK Planta 99)
 
-pokemonesDe :: Entrenador -> (Pokemon, Pokemon)
-pokemonesDe (E _ pk1 pk2) = (pk1, pk2)
+pokemonesDe :: Entrenador -> [Pokemon]
+pokemonesDe (E _ pk1 pk2) = pk1 : pk2 : []
 
 tipoDe :: Pokemon -> TipoDePokemon
 tipoDe (PK tp _) = tp
+
+esTipo :: Pokemon -> TipoDePokemon -> Bool
+esTipo pk tp = mismoTipo (tipoDe pk) tp
 
 tipoSuperiorA :: TipoDePokemon -> TipoDePokemon -> Bool
 tipoSuperiorA Agua Fuego = True
@@ -168,15 +171,11 @@ superaA :: Pokemon -> Pokemon -> Bool
 superaA (PK t1 _) (PK t2 _) =  tipoSuperiorA t1 t2
 
 cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDe tp e = unoSiEsTipo (fst (pokemonesDe e)) tp + unoSiEsTipo (snd (pokemonesDe e)) tp
+cantidadDePokemonDe tp (E _ pk1 pk2) = unoSi (esTipo pk1 tp) + unoSi (esTipo pk2 tp)
 
-cantidadDePokemonDe2 :: TipoDePokemon -> Entrenador -> Int
-cantidadDePokemonDe2 tp (E _ pk1 pk2) = unoSiEsTipo pk1 tp + unoSiEsTipo pk2 tp
-
-unoSiEsTipo :: Pokemon -> TipoDePokemon -> Int
-unoSiEsTipo p tp = if mismoTipo (tipoDe p) tp 
-                    then 1
-                    else 0
+unoSi :: Bool -> Int
+unoSi True = 1
+unoSi False = 0
 
 mismoTipo :: TipoDePokemon -> TipoDePokemon -> Bool
 mismoTipo Fuego Fuego = True
@@ -185,7 +184,7 @@ mismoTipo Planta Planta = True
 mismoTipo _ _ = False
 
 juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
-juntarPokemon (e1,e2) = fst(pokemonesDe e1) : fst(pokemonesDe e2) : snd(pokemonesDe e1) : snd(pokemonesDe e2) : []
+juntarPokemon entrenadores = pokemonesDe (fst entrenadores) ++ pokemonesDe (snd entrenadores)
 
 -- Funciones polimorficas --
 -- 5 --
