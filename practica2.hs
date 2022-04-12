@@ -2,14 +2,6 @@
 sucesor :: Int -> Int
 sucesor n = n+1
 
-and' :: Bool -> Bool -> Bool
-and' True True = True
-and' _ _ = False
-
-or' :: Bool -> Bool -> Bool
-or' False False = False
-or' _ _ = True
-
 maxDelPar :: (Int, Int) -> Int
 maxDelPar (n, m) = if(n>m) then n
                    else         m
@@ -48,6 +40,9 @@ tipoSuperiorA _ _ = False
 superaA :: Pokemon -> Pokemon -> Bool
 superaA (PK t1 _) (PK t2 _) =  tipoSuperiorA t1 t2
 
+equals :: Eq a => a -> a -> Bool
+equals x y = x == y
+
 -- Recursión sobre listas --
 
 -- 1 --
@@ -68,12 +63,12 @@ sucesores (x:xs) = sucesor x : sucesores xs
 -- 4 --
 conjuncion :: [Bool] -> Bool
 conjuncion [] = True 
-conjuncion (b:bs) = and' b (conjuncion bs)
+conjuncion (b:bs) = b && (conjuncion bs)
 
 -- 5 --
 disyuncion :: [Bool] -> Bool
 disyuncion [] = False
-disyuncion (b:bs) = or' b (disyuncion bs)
+disyuncion (b:bs) = b || (disyuncion bs)
 
 -- 6 --
 aplanar :: [[a]] -> [a]
@@ -83,9 +78,7 @@ aplanar (l:ls) = l ++ aplanar ls
 -- 7 --
 pertenece :: Eq a => a -> [a] -> Bool
 pertenece e [] = False
-pertenece e (x:xs) = if x == e
-                        then True
-                        else pertenece e xs
+pertenece e (x:xs) = x == e || pertenece e xs 
 
 -- 8 --
 apariciones :: Eq a => a -> [a] -> Int
@@ -111,17 +104,12 @@ lasDeLongitudMayorA n (l:ls) = if longitud l > n
 -- 11 --
 agregarAlFinal :: [a] -> a -> [a]
 agregarAlFinal [] e = [e]
-agregarAlFinal l e = l ++ [e]
-
--- Con recursion --
-agregarAlFinal' :: [a] -> a -> [a]
-agregarAlFinal' [] e = [e]
-agregarAlFinal' (x:xs) e = x : agregarAlFinal xs e
+agregarAlFinal (x:xs) e = x : agregarAlFinal xs e
 
 -- 12 --
-concatenar :: [a] -> [a] -> [a]
-concatenar [] ys = ys
-concatenar (x:xs) ys = x : concatenar xs ys
+agregar :: [a] -> [a] -> [a]
+agregar [] ys = ys
+agregar (x:xs) ys = x : agregar xs ys
 
 -- 13 --
 reversa :: [a] -> [a]
@@ -130,8 +118,9 @@ reversa (x:xs) = agregarAlFinal (reversa xs) x
 
 -- 14 --
 zipMaximos :: [Int] -> [Int] -> [Int]
-zipMaximos [] _ = []
-zipMaximos _ [] = []
+zipMaximos [] [] = []
+zipMaximos [] (x:xs) = [x]
+zipMaximos (x:xs) [] = [x]
 zipMaximos (x:xs) (y:ys) = maxDelPar (x,y) : zipMaximos xs ys
 
 -- 15 --
@@ -148,8 +137,9 @@ factorial n = n * factorial(n - 1)
 
 -- 2 --
 cuentaRegresiva :: Int -> [Int]
-cuentaRegresiva 0 = []
-cuentaRegresiva n  = n : cuentaRegresiva(n - 1)
+cuentaRegresiva n  = if n <= 0
+                        then []
+                        else n : cuentaRegresiva(n - 1)
 
 -- 3 --
 repetir :: Int -> a -> [a]
@@ -215,6 +205,7 @@ data Entrenador = E String [Pokemon]
 e1 = E "Brian" [(PK Fuego 100),(PK Fuego 100)]
 e2 = E "Leonel" [(PK Agua 100),(PK Planta 100)]
 e3 = E "Debora" [(PK Planta 100),(PK Planta 99)]
+e4 = E "Doña Rosa" [(PK Planta 100),(PK Fuego 100),(PK Agua 100)]
 
 pokemon1 = PK Fuego 100
 pokemon2 = PK Planta 100
@@ -236,7 +227,7 @@ cantPokemonDe tp (E n pks) = longitud (pokemonDe tp pks)
 
 pokemonLeGanaATodos :: Pokemon -> [Pokemon] -> Bool
 pokemonLeGanaATodos _ [] = True
-pokemonLeGanaATodos p (pk:pks) = and' (superaA p pk) (pokemonLeGanaATodos p pks)
+pokemonLeGanaATodos p (pk:pks) = (superaA p pk) && (pokemonLeGanaATodos p pks)
 
 cantPokemonLeGanaATodos :: [Pokemon] -> [Pokemon] -> Int
 cantPokemonLeGanaATodos [] _ = 0
@@ -244,3 +235,105 @@ cantPokemonLeGanaATodos (pk:pks) pksRival = unoSi (pokemonLeGanaATodos pk pksRiv
 
 losQueLeGanan :: TipoDePokemon -> Entrenador -> Entrenador -> Int
 losQueLeGanan tp (E _ pks1) (E _ pks2) = cantPokemonLeGanaATodos (pokemonDe tp pks1) pks2
+
+tienePokemonDe :: [Pokemon] -> TipoDePokemon -> Bool
+tienePokemonDe [] tp = False
+tienePokemonDe (pk:pks) tp = mismoTipo tp (tipoDe pk) || tienePokemonDe pks tp
+
+hayTodosLosTipos :: [Pokemon] -> Bool
+hayTodosLosTipos pks = tienePokemonDe pks Fuego && tienePokemonDe pks Agua && tienePokemonDe pks Planta
+
+esMaestroPokemon :: Entrenador -> Bool
+esMaestroPokemon (E _ pks) = hayTodosLosTipos pks
+
+
+-- 3 --
+
+data Seniority = Junior | SemiSenior | Senior
+data Proyecto = ConsProyecto String
+    deriving (Show)
+data Rol = Developer Seniority Proyecto | Management Seniority Proyecto
+data Empresa = ConsEmpresa [Rol]
+
+empresa1 = ConsEmpresa [rol1, rol2, rol3, rol4, rol5]
+
+rol1  = (Developer Senior pro1)
+rol2 = (Management Senior pro1)
+rol3 = (Management SemiSenior pro2) 
+rol4 = (Developer Senior pro2)
+rol5 = (Developer Senior pro3)
+rol6 = (Developer Senior pro3)
+rol7 = (Developer Senior pro3)
+
+pro1 = ConsProyecto "facebook"
+pro2 = ConsProyecto "twitter"
+pro3 = ConsProyecto "instagram"
+pro4 = ConsProyecto "telegram"
+pro5 = ConsProyecto "whatsapp"
+pro6 = ConsProyecto "sube"
+
+
+proyectos :: Empresa -> [Proyecto]
+proyectos (ConsEmpresa rs) = proyectosSinRepetidos (proyectosDeRoles rs)
+
+proyectosDeRoles :: [Rol] -> [Proyecto]
+proyectosDeRoles [] = []
+proyectosDeRoles (rl:rls) = proyecto rl : proyectosDeRoles rls
+
+proyecto :: Rol -> Proyecto
+proyecto (Developer _ p) = p
+proyecto (Management _ p) = p
+
+proyectosSinRepetidos :: [Proyecto] -> [Proyecto]
+proyectosSinRepetidos [] = []
+proyectosSinRepetidos (p:ps) = if proyectoEn p ps
+                                then proyectosSinRepetidos ps
+                                else p : proyectosSinRepetidos ps
+
+proyectoEn :: Proyecto -> [Proyecto] -> Bool
+proyectoEn pb [] = False
+proyectoEn pb (p:ps) = equals (nombre pb) (nombre p) ||  proyectoEn pb ps
+
+nombre :: Proyecto -> String
+nombre (ConsProyecto n) = n
+
+losDevSenior :: Empresa -> [Proyecto] -> Int
+losDevSenior e [] = 0
+losDevSenior (ConsEmpresa rs) ps = longitud (losQueTrabajanEn (devsSenior rs) ps)
+
+devsSenior :: [Rol] -> [Rol]
+devsSenior [] = []
+devsSenior (r:rs) = if esDevSenior r
+                        then r : devsSenior rs
+                        else devsSenior rs
+
+esDevSenior :: Rol -> Bool
+esDevSenior (Developer Senior _) = True
+esDevSenior _                    = False
+
+
+cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
+cantQueTrabajanEn ps (ConsEmpresa rs) = longitud (losQueTrabajanEn rs ps)
+
+losQueTrabajanEn :: [Rol] -> [Proyecto] -> [Rol]
+losQueTrabajanEn []     _  = []
+losQueTrabajanEn _      [] = []
+losQueTrabajanEn (r:rs) ps = 
+    if trabajaEn r ps 
+    	then r : losQueTrabajanEn rs ps
+    	else losQueTrabajanEn rs ps
+
+trabajaEn :: Rol -> [Proyecto] -> Bool
+trabajaEn _ []       = False
+trabajaEn r (p:ps) = equals (nombre (proyecto r)) (nombre p) || trabajaEn r ps
+
+
+asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+asignadosPorProyecto e = cantidadRolesPorProyecto (proyectos e) (roles e) 
+ 
+cantidadRolesPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
+cantidadRolesPorProyecto [] _  = []
+cantidadRolesPorProyecto (p:ps) rs = (p, longitud (losQueTrabajanEn rs [p])) : cantidadRolesPorProyecto ps rs
+
+roles :: Empresa -> [Rol]
+roles (ConsEmpresa rs) = rs
