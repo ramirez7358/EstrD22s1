@@ -2,10 +2,6 @@
 sucesor :: Int -> Int
 sucesor n = n+1
 
-maxDelPar :: (Int, Int) -> Int
-maxDelPar (n, m) = if(n>m) then n
-                   else         m
-
 minDelPar :: (Int, Int) -> Int
 minDelPar (n, m) = if(n>m) then m
                    else         n
@@ -118,10 +114,9 @@ reversa (x:xs) = agregarAlFinal (reversa xs) x
 
 -- 14 --
 zipMaximos :: [Int] -> [Int] -> [Int]
-zipMaximos [] [] = []
-zipMaximos [] (x:xs) = [x]
-zipMaximos (x:xs) [] = [x]
-zipMaximos (x:xs) (y:ys) = maxDelPar (x,y) : zipMaximos xs ys
+zipMaximos xs [] = xs
+zipMaximos [] ys = ys
+zipMaximos (x:xs) (y:ys) = max x y : (zipMaximos xs ys)
 
 -- 15 --
 elMinimo :: Ord a => [a] -> a
