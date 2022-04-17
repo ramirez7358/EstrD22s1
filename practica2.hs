@@ -36,9 +36,6 @@ tipoSuperiorA _ _ = False
 superaA :: Pokemon -> Pokemon -> Bool
 superaA (PK t1 _) (PK t2 _) =  tipoSuperiorA t1 t2
 
-equals :: Eq a => a -> a -> Bool
-equals x y = x == y
-
 -- Recursión sobre listas --
 
 -- 1 --
@@ -281,13 +278,13 @@ proyecto (Management _ p) = p
 
 proyectosSinRepetidos :: [Proyecto] -> [Proyecto]
 proyectosSinRepetidos [] = []
-proyectosSinRepetidos (p:ps) = if proyectoEn p ps
+proyectosSinRepetidos (p:ps) = if proyectoEn p (proyectosSinRepetidos ps)
                                 then proyectosSinRepetidos ps
                                 else p : proyectosSinRepetidos ps
 
 proyectoEn :: Proyecto -> [Proyecto] -> Bool
 proyectoEn pb [] = False
-proyectoEn pb (p:ps) = equals (nombre pb) (nombre p) ||  proyectoEn pb ps
+proyectoEn pb (p:ps) = (nombre pb) == (nombre p) ||  proyectoEn pb ps
 
 nombre :: Proyecto -> String
 nombre (ConsProyecto n) = n
@@ -312,15 +309,13 @@ cantQueTrabajanEn ps (ConsEmpresa rs) = longitud (losQueTrabajanEn rs ps)
 
 losQueTrabajanEn :: [Rol] -> [Proyecto] -> [Rol]
 losQueTrabajanEn []     _  = []
-losQueTrabajanEn _      [] = []
-losQueTrabajanEn (r:rs) ps = 
-    if trabajaEn r ps 
-    	then r : losQueTrabajanEn rs ps
-    	else losQueTrabajanEn rs ps
+losQueTrabajanEn (r:rs) ps = if trabajaEn r ps 
+    	                        then r : losQueTrabajanEn rs ps
+    	                        else losQueTrabajanEn rs ps
 
 trabajaEn :: Rol -> [Proyecto] -> Bool
 trabajaEn _ []       = False
-trabajaEn r (p:ps) = equals (nombre (proyecto r)) (nombre p) || trabajaEn r ps
+trabajaEn r (p:ps) = (nombre (proyecto r)) == (nombre p) || trabajaEn r ps
 
 
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
@@ -328,7 +323,11 @@ asignadosPorProyecto e = cantidadRolesPorProyecto (proyectos e) (roles e)
  
 cantidadRolesPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
 cantidadRolesPorProyecto [] _  = []
-cantidadRolesPorProyecto (p:ps) rs = (p, longitud (losQueTrabajanEn rs [p])) : cantidadRolesPorProyecto ps rs
+cantidadRolesPorProyecto (p:ps) rs = (p, cantDeRolesEn rs p) : cantidadRolesPorProyecto ps rs
+
+cantDeRolesEn :: [Rol] -> Proyecto -> Int
+cantDeRolesEn [] _ = 0
+cantDeRolesEn (r:rs) p = unoSi ( trabajaEn r [p] ) + cantDeRolesEn rs p
 
 roles :: Empresa -> [Rol]
 roles (ConsEmpresa rs) = rs
