@@ -278,9 +278,12 @@ proyecto (Management _ p) = p
 
 proyectosSinRepetidos :: [Proyecto] -> [Proyecto]
 proyectosSinRepetidos [] = []
-proyectosSinRepetidos (p:ps) = if proyectoEn p (proyectosSinRepetidos ps)
-                                then proyectosSinRepetidos ps
-                                else p : proyectosSinRepetidos ps
+proyectosSinRepetidos (p:ps) = agregarProyectoSiNoEsta p (proyectosSinRepetidos ps)
+
+agregarProyectoSiNoEsta :: Proyecto -> [Proyecto] -> [Proyecto]
+agregarProyectoSiNoEsta p ps = if proyectoEn p ps
+                                then ps
+                                else p:ps
 
 proyectoEn :: Proyecto -> [Proyecto] -> Bool
 proyectoEn pb [] = False
