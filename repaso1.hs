@@ -64,6 +64,7 @@ cantCapasPorPizza (pz:pzs) = (cantidadDeCapas pz,pz) : cantCapasPorPizza pzs
 -- Mapa de tesoro --
 
 data Dir = Izq | Der
+    deriving Show
 data Objeto = Tesoro | Chatarra
     deriving Show
 data Cofre = Cofre [Objeto]
@@ -77,6 +78,12 @@ cofre1 = Cofre [Chatarra, Tesoro, Chatarra]
 mapa0 = Bifurcacion cofre0 (Fin cofre1) (Fin cofre0)
 mapa1 = Bifurcacion cofre0 (Fin cofre1) (Fin cofre1)
 mapa2 = Bifurcacion cofre0 mapa0 mapa1
+mapa3 = Bifurcacion cofre0 (Fin cofre0) (Fin cofre0)
+
+-- Mapa con tesoro unico
+mapa4 = Bifurcacion cofre0 (Bifurcacion cofre0 mapa3 mapa3) (Bifurcacion cofre0 mapa0 mapa3)
+mapa5 = Bifurcacion cofre1 (Fin cofre0) (Fin cofre0)
+mapa6 = Bifurcacion cofre0 mapa4 mapa4
 
 hayTesoro :: Mapa -> Bool
 hayTesoro (Fin c) = hayTesoroEnCofre c
@@ -115,4 +122,37 @@ cofre :: Mapa -> Cofre
 cofre (Fin c) = c
 cofre (Bifurcacion c _ _) = c
 
---caminoAlTesoro :: Mapa -> [Dir]
+caminoAlTesoro :: Mapa -> [Dir]
+caminoAlTesoro (Fin _) = []
+caminoAlTesoro m = if hayTesoroEnCofre (cofre m)
+                    then []
+                    else caminoAlTesoro' m
+
+caminoAlTesoro' :: Mapa -> [Dir]
+caminoAlTesoro' (Fin _) = []
+caminoAlTesoro' (Bifurcacion _ m1 m2) = if hayTesoro m1
+                                            then Izq : caminoAlTesoro' m1
+                                            else Der : caminoAlTesoro' m2
+
+pasosAlFin :: Mapa -> Int
+pasosAlFin (Fin _) = 0
+pasosAlFin (Bifurcacion _ m1 m2) = 1 + max (pasosAlFin m1) (pasosAlFin m2)
+
+caminoDeLaRamaMasLarga :: Mapa -> [Dir]
+caminoDeLaRamaMasLarga (Fin _) = []
+caminoDeLaRamaMasLarga (Bifurcacion _ m1 m2) = if pasosAlFin m1 > pasosAlFin m2
+                                                then Izq : caminoDeLaRamaMasLarga m1
+                                                else Der : caminoDeLaRamaMasLarga m2
+
+singularSi :: a -> Bool -> [a]
+singularSi x True = x:[]
+singularSi x False = []
+
+soloLosTesorosDe :: [Objeto] -> [Objeto]
+soloLosTesorosDe [] = []
+soloLosTesorosDe (obj:objs) = singularSi obj (esTesoro obj) ++ soloLosTesorosDe objs
+
+-- Juntar por niveles --
+tesorosPorNivel :: Mapa -> [[Objeto]]
+tesorosPorNivel (Fin c) = [soloLosTesorosDe (abrirCofre c)]
+tesorosPorNivel (Bifurcacion c m1 m2) = soloLosTesorosDe (abrirCofre c) : (tesorosPorNivel m1 ++ tesorosPorNivel m2)
