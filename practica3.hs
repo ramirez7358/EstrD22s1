@@ -109,6 +109,8 @@ tr2 = NodeT 7 (tr1) (tr0)
 tr3 = NodeT 10 tr2 tr1'
 tr4 = NodeT 20 EmptyT tr3
 tr5 = NodeT 55 tr4 tr3
+tr6 = NodeT 99 (EmptyT) tr2
+tr7 = NodeT 1 tr1 tr1'
 
 sumarT :: Tree Integer -> Integer
 sumarT EmptyT = 0
@@ -156,14 +158,18 @@ toList EmptyT = []
 toList (NodeT en t1 t2) = toList t1 ++ en:[] ++ toList t2
 
 levelN :: Int -> Tree a -> [a]
-levelN n EmptyT = []
+levelN _ EmptyT = []
 levelN 0 (NodeT en t1 t2) = en:[]
-levelN n (NodeT en t1 t2) = levelN (n-1) t1 ++ levelN (n-1) t1 
+levelN n (NodeT en t1 t2) = levelN (n-1) t1 ++ levelN (n-1) t2
 
--- Esta mal, revisar
 listPerLevel :: Tree a -> [[a]]
 listPerLevel EmptyT = []
-listPerLevel (NodeT en t1 t2) = [en] : (listPerLevel t1 ++ listPerLevel t2)
+listPerLevel (NodeT en t1 t2) = [en] : juntarNivel (listPerLevel t1) (listPerLevel t2)
+
+juntarNivel :: [[a]] -> [[a]] -> [[a]]
+juntarNivel []       yss      = yss
+juntarNivel xss        []     = xss
+juntarNivel (xs:xss) (ys:yss) = (xs ++ ys) : juntarNivel xss yss
 
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
@@ -172,9 +178,13 @@ ramaMasLarga (NodeT en t1 t2) = en:[] ++ ramaMasLarga (nodoMasAlto t1 t2)
 nodoMasAlto :: Tree a -> Tree a -> Tree a
 nodoMasAlto t1 t2 = if (heightT t1 > heightT t2) then t1 else t2
 
---todosLosCaminos :: Tree a -> [[a]]
---todosLosCaminos EmptyT = ...
---todosLosCaminos (NodeT en t1 t2)
+todosLosCaminos :: Tree a -> [[a]]
+todoslosCaminos EmptyT = []
+todosLosCaminos (NodeT e t1 t2) = (e:[]) : agregar e (todosLosCaminos t1) ++ agregar e (todosLosCaminos t2)
+
+agregar :: a -> [[a]] -> [[a]]
+agregar x []  = []
+agregar x (ys:yss) = (x:ys) : agregar x yss 
 
 data ExpA = Valor Int 
           | Sum ExpA ExpA
@@ -190,4 +200,22 @@ eval (Neg exp) = -(eval exp)
 
 simplificar :: ExpA -> ExpA
 simplificar (Valor n) = (Valor n) 
-simplificar (Sum exp1 exp2) = if (eval (simplificar exp1) == 0) then exp2 else exp1
+simplificar (Sum x y) = simplificarSuma x y
+simplificar (Prod x y) = simplificarProducto x y
+simplificar (Neg x) = simplificarNegacion x
+
+simplificarSuma :: ExpA -> ExpA -> ExpA
+simplificarSuma (Valor 0) y = y
+simplificarSuma x (Valor 0) = x
+simplificarSuma x y = Sum x y
+
+simplificarProducto :: ExpA -> ExpA -> ExpA
+simplificarProducto (Valor 0) y = (Valor 0)
+simplificarProducto x (Valor 0) = (Valor 0)
+simplificarProducto (Valor 1) y = y
+simplificarProducto x (Valor 1) = x
+simplificarProducto x y = Prod x y
+
+simplificarNegacion :: ExpA -> ExpA
+simplificarNegacion (Neg (Neg x)) = x
+simplificarNegacion x = x
