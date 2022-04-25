@@ -320,8 +320,22 @@ trabajaEn :: Rol -> [Proyecto] -> Bool
 trabajaEn _ []       = False
 trabajaEn r (p:ps) = (nombre (proyecto r)) == (nombre p) || trabajaEn r ps
 
-
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+asignadosPorProyecto (ConsEmpresa rs) = asignadosPorProyectoR rs
+
+asignadosPorProyectoR :: [Rol] -> [(Proyecto, Int)]
+asignadosPorProyectoR [] = []
+asignadosProyectoR (r:rs) = computarProyectosDe r (asinadosPorProyectoR rs)
+
+computarProyectosDe :: Rol -> [(Proyecto, Int)] -> [(Proyecto, Int)]
+computarProyectosDe r [] = [(proyecto r, 1)]
+computarProyectosDe r (tpl:tpls) = if (proyecto r) == fst tpl
+                                    then (fst tpl, snd tpl + 1)
+                                    else t : computarProyectosDe t tpls
+
+
+-- Solucion mal --
+{-asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
 asignadosPorProyecto e = cantidadRolesPorProyecto (proyectos e) (roles e) 
  
 cantidadRolesPorProyecto :: [Proyecto] -> [Rol] -> [(Proyecto, Int)]
@@ -330,7 +344,7 @@ cantidadRolesPorProyecto (p:ps) rs = (p, cantDeRolesEn rs p) : cantidadRolesPorP
 
 cantDeRolesEn :: [Rol] -> Proyecto -> Int
 cantDeRolesEn [] _ = 0
-cantDeRolesEn (r:rs) p = unoSi ( trabajaEn r [p] ) + cantDeRolesEn rs p
+cantDeRolesEn (r:rs) p = unoSi ( trabajaEn r [p] ) + cantDeRolesEn rs p-}
 
 roles :: Empresa -> [Rol]
 roles (ConsEmpresa rs) = rs
