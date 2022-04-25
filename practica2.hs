@@ -248,6 +248,7 @@ data Rol = Developer Seniority Proyecto | Management Seniority Proyecto
 data Empresa = ConsEmpresa [Rol]
 
 empresa1 = ConsEmpresa [rol1, rol2, rol3, rol4, rol5]
+empresa2 = ConsEmpresa [rol1, rol2, rol3, rol4, rol5, rol6, rol7, rol8, rol9, rol10, rol11, rol12, rol13, rol14, rol15, rol16, rol17, rol18, rol19, rol20]
 
 rol1  = (Developer Senior pro1)
 rol2 = (Management Senior pro1)
@@ -256,6 +257,19 @@ rol4 = (Developer Senior pro2)
 rol5 = (Developer Senior pro3)
 rol6 = (Developer Senior pro3)
 rol7 = (Developer Senior pro3)
+rol8 = (Developer Senior pro4)
+rol9 = (Developer Senior pro5)
+rol10 = (Developer Senior pro6)
+rol11 = (Developer Senior pro4)
+rol12 = (Developer Senior pro6)
+rol13 = (Developer Senior pro6)
+rol14 = (Developer Senior pro6)
+rol15 = (Developer Senior pro6)
+rol16 = (Developer Senior pro6)
+rol17 = (Developer Senior pro6)
+rol18 = (Developer Senior pro6)
+rol19 = (Developer Senior pro6)
+rol20 = (Developer Senior pro6)
 
 pro1 = ConsProyecto "facebook"
 pro2 = ConsProyecto "twitter"
@@ -325,13 +339,16 @@ asignadosPorProyecto (ConsEmpresa rs) = asignadosPorProyectoR rs
 
 asignadosPorProyectoR :: [Rol] -> [(Proyecto, Int)]
 asignadosPorProyectoR [] = []
-asignadosProyectoR (r:rs) = computarProyectosDe r (asinadosPorProyectoR rs)
+asignadosPorProyectoR (r:rs) = computarProyectosDe r (asignadosPorProyectoR rs)
 
 computarProyectosDe :: Rol -> [(Proyecto, Int)] -> [(Proyecto, Int)]
 computarProyectosDe r [] = [(proyecto r, 1)]
-computarProyectosDe r (tpl:tpls) = if (proyecto r) == fst tpl
-                                    then (fst tpl, snd tpl + 1)
-                                    else t : computarProyectosDe t tpls
+computarProyectosDe r (tpl:tpls) = if mismoProyecto (proyecto r) (fst tpl)
+                                    then (fst tpl, snd tpl + 1) : tpls
+                                    else tpl : computarProyectosDe r tpls
+
+mismoProyecto :: Proyecto -> Proyecto -> Bool
+mismoProyecto p1 p2 = nombre p1 == nombre p2
 
 
 -- Solucion mal --
