@@ -30,8 +30,11 @@ singularSi x True = x:[]
 singularSi x False = []
 
 poner :: Color -> Celda -> Celda
-poner c CeldaVacia = (Bolita c CeldaVacia)
-poner c (Bolita cb cel) = (Bolita cb (poner c cel))
+poner c cl = Bolita c cl
+{-
+    Solucion con recursion
+    poner c (Bolita cb cel) = (Bolita cb (poner c cel))
+-}
 
 sacar :: Color -> Celda -> Celda
 sacar _ CeldaVacia = CeldaVacia
@@ -41,8 +44,7 @@ sacar c (Bolita cb cel) = if mismoColor cb c
 
 ponerN :: Int -> Color -> Celda -> Celda
 ponerN 0 _ cel = cel
-ponerN n c CeldaVacia = Bolita c (ponerN (n-1) c CeldaVacia)
-ponerN n c (Bolita cb cel) = Bolita cb (ponerN (n-1) c cel)
+ponerN n c cl = Bolita c (ponerN (n-1) c cl) 
 
 -- Camino hacia el tesoro --
 
@@ -80,11 +82,16 @@ pasosHastaTesoro (Cofre objs c) = if hayTesoroEnLista objs
                                     else 1 + pasosHastaTesoro c
 
 hayTesoroEn :: Int -> Camino -> Bool
-hayTesoroEn _ Fin            = False
+hayTesoroEn p c = hayTesoroEnCamino (avanzarHasta p c)
+{-hayTesoroEn _ Fin            = False
 hayTesoroEn n (Nada c)       = hayTesoroEn (n-1) c
 hayTesoroEn n (Cofre objs c) = if n == 0
                                 then hayTesoroEnLista objs
-                                else hayTesoroEn (n-1) c
+                                else hayTesoroEn (n-1) c-}
+
+hayTesoroEnCamino :: Camino -> Bool
+hayTesoroEnCamino (Cofre objs _) = hayTesoroEnLista objs
+hayTesoroEnCamino _ = False
 
 cantidadDeTesoros :: [Objeto] -> Int
 cantidadDeTesoros [] = 0
@@ -94,7 +101,22 @@ alMenosNTesoros :: Int -> Camino -> Bool
 alMenosNTesoros 0 _ = True
 alMenosNTesoros _ Fin = False
 alMenosNTesoros n (Nada c) = alMenosNTesoros n c
-alMenosNTesoros n (Cofre objs c) = alMenosNTesoros (n - cantidadDeTesoros objs) c
+alMenosNTesoros n (Cofre objs c) = let ct = cantidadDeTesoros objs in ct >= n ||  alMenosNTesoros (n - ct) c
+--alMenosNTesoros n (Cofre objs c) = cantidadDeTesoros objs >= n || alMenosNTesoros (n - cantidadDeTesoros objs) c
+
+cantTesorosEntre :: Int -> Int -> Camino -> Int
+cantTesorosEntre d h c = cantidadDeTesorosHasta (h -d) (avanzarHasta d c)
+
+cantidadDeTesorosHasta :: Int -> Camino -> Int
+cantidadDeTesorosHasta n Fin = 0
+cantidadDeTesorosHasta n (Nada c) = cantidadDeTesorosHasta (n - 1) c
+cantidadDeTesorosHasta n (Cofre objs c) = cantidadDeTesoros objs + cantidadDeTesorosHasta (n-1) c
+
+avanzarHasta :: Int -> Camino -> Camino
+avanzarHasta 0 c = c
+avanzarHasta _ Fin = Fin
+avanzarHasta n (Nada c) = avanzarHasta (n-1) c
+avanzarHasta n (Cofre _ c) = avanzarHasta (n-1) c
 
 -- Tipos arboreos --
 -- Arboles binarios --
@@ -173,7 +195,13 @@ juntarNivel (xs:xss) (ys:yss) = (xs ++ ys) : juntarNivel xss yss
 
 ramaMasLarga :: Tree a -> [a]
 ramaMasLarga EmptyT = []
-ramaMasLarga (NodeT en t1 t2) = en:[] ++ ramaMasLarga (nodoMasAlto t1 t2)
+ramaMasLarga (NodeT en t1 t2) = en : listaMasLarga (ramaMasLarga t1) (ramaMasLarga t2)
+--ramaMasLarga (NodeT en t1 t2) = en:[] ++ ramaMasLarga (nodoMasAlto t1 t2)
+
+listaMasLarga :: [a] -> [a] -> [a]
+listaMasLarga n1 n2 = if length n1 > length n2
+                        then n1
+                        else n2
 
 nodoMasAlto :: Tree a -> Tree a -> Tree a
 nodoMasAlto t1 t2 = if (heightT t1 > heightT t2) then t1 else t2
@@ -217,5 +245,5 @@ simplificarProducto x (Valor 1) = x
 simplificarProducto x y = Prod x y
 
 simplificarNegacion :: ExpA -> ExpA
-simplificarNegacion (Neg (Neg x)) = x
-simplificarNegacion x = x
+simplificarNegacion (Neg x) = x
+simplificarNegacion x = Neg x
