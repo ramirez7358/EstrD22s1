@@ -20,6 +20,7 @@ addS e (Set ns l) = if elem e ns
 belongs :: Eq a => a -> Set a -> Bool
 belongs e (Set xs _) = belongsList e xs
 
+-- O(n) 
 belongsList :: Eq a => a -> [a] -> Bool
 belongsList _ [] = False
 belongsList n (x:xs) = n == x || belongsList n xs
