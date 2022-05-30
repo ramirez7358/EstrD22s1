@@ -31,6 +31,7 @@ sizeS (Set _ l) = l
 
 -- Borra un elemento del conjunto.
 -- PRECOND: El elemento que se quiere borrar existe en la lista
+-- O()
 removeS :: Eq a => a -> Set a -> Set a
 removeS n (Set xs l) = Set (removeL n xs) (l-1)
 
