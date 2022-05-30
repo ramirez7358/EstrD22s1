@@ -207,7 +207,7 @@ nodoMasAlto :: Tree a -> Tree a -> Tree a
 nodoMasAlto t1 t2 = if (heightT t1 > heightT t2) then t1 else t2
 
 todosLosCaminos :: Tree a -> [[a]]
-todoslosCaminos EmptyT = []
+todosLosCaminos EmptyT = []
 todosLosCaminos (NodeT e t1 t2) = (e:[]) : agregar e (todosLosCaminos t1) ++ agregar e (todosLosCaminos t2)
 
 agregar :: a -> [[a]] -> [[a]]

@@ -25,6 +25,6 @@ top (Stack xs) = head xs
 pop :: Stack a -> Stack a
 pop (Stack xs) = Stack (tail xs)
 
--- O(1)
+-- O(n)
 lenS :: Stack a -> Int
 lenS (Stack xs) = length xs
