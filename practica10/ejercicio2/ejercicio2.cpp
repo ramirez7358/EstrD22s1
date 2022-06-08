@@ -6,7 +6,7 @@ int main()
 {
     Pokemon p = consPokemon("fuego");
 
-    cout << p->tipo << endl;
+    cout << (1 << 20) << endl;
 
     return 0;
 }

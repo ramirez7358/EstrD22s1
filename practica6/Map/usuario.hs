@@ -1,4 +1,4 @@
-import Map
+import Map3
 
 fromJust :: Maybe a -> a
   -- PRECOND: no puede ser Nothing
@@ -88,3 +88,26 @@ mergeMapsL (x:xs) m1 m2 = let map = mergeMapsL xs m1 m2
                               val = lookupM x m1
                               in
                                 assocM x (fromJust val) map
+
+-- Costo: O(n)
+indexar :: [a] -> Map Int a
+indexar xs = indexar' xs 0
+
+indexar' :: [a] -> Int -> Map Int a
+indexar' [] _ = emptyM
+indexar' (x:xs) i = assocM i x (indexar' xs (i+1))
+
+
+ocurrencias :: String -> Map Char Int
+ocurrencias [] = emptyM
+ocurrencias (c:cs) = agregarOAumentar c (ocurrencias cs)
+
+agregarOAumentar :: Eq k => k -> Map k Int -> Map k Int
+agregarOAumentar k map = if elem k (keys map)
+                          then assocM k (fromJust (lookupM k map) + 1) (deleteM k map)
+                          else assocM k 1 map
+
+--O(1)
+fromMaybe :: a -> Maybe a -> a
+fromMaybe x Nothing = x
+fromMaybe x (Just y) = y
