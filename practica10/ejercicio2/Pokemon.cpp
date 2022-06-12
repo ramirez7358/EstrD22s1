@@ -2,6 +2,12 @@
 #include "Pokemon.h"
 using namespace std;
 
+struct PokeSt
+{
+    TipoDePokemon tipo;
+    int vida;
+};
+
 Pokemon consPokemon(TipoDePokemon tipo)
 {
     PokeSt *p = new PokeSt;
@@ -27,10 +33,25 @@ void perderEnergia(int energia, Pokemon p)
 
 bool superaAAux(TipoDePokemon tp1, TipoDePokemon tp2)
 {
-    return true;
+    if (tp1 == "agua" && tp2 == "fuego")
+    {
+        return true;
+    }
+    else if (tp1 == "fuego" && tp2 == "planta")
+    {
+        return true;
+    }
+    else if (tp1 == "planta" && tp2 == "agua")
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool superaA(Pokemon p1, Pokemon p2)
 {
-    return superaAAux(p1->tipo, p2->tipo) ? p1 : p2;
+    return superaAAux(p1->tipo, p2->tipo);
 }
