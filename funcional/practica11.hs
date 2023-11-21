@@ -291,48 +291,60 @@ zipWith'''' f xs ys =
 -- Esta mal, pensarla mejor
 scanr'''' :: (a -> b -> b) -> b -> [a] -> [b]
 scanr'''' f y = foldr' g []
-                    where
-                        g x [] = [y]
-                        g x r = f x (head r) : r
-
+  where
+    g x [] = [y]
+    g x r = f x (head r) : r
 
 takeWhile'''' :: (a -> Bool) -> [a] -> [a]
 takeWhile'''' p = foldr' (\x r -> if p x then x : r else []) []
 
-
 take'''' :: Int -> [a] -> [a]
-take'''' n xs = foldr'
-                g
-                (const [])
-                xs
-                n
-            where
-                g x r 0 = []
-                g x r n = x : r (n -1)
+take'''' n xs =
+  foldr'
+    g
+    (const [])
+    xs
+    n
+  where
+    g x r 0 = []
+    g x r n = x : r (n - 1)
 
 drop'''' :: Int -> [a] -> [a]
-drop'''' n xs = recr
-                    (const [])
-                    g
-                    xs
-                    n
-                where
-                    g x xs r 0 = x : xs
-                    g x xs r n = r (n - 1)
+drop'''' n xs =
+  recr
+    (const [])
+    g
+    xs
+    n
+  where
+    g x xs r 0 = x : xs
+    g x xs r n = r (n - 1)
 
 b'''' :: Int -> [a] -> a
-b'''' n xs = foldr' 
-                g
-                (error "Index too large")
-                xs
-                n
-            where
-                g x r 0 = x
-                g x r n = r (n - 1)
-
+b'''' n xs =
+  foldr'
+    g
+    (error "Index too large")
+    xs
+    n
+  where
+    g x r 0 = x
+    g x r n = r (n - 1)
 
 head'''' :: [a] -> a
-head'''' = foldr' const (error "no tiene head")                
+head'''' = foldr' const (error "no tiene head")
 
 tail'''' :: [a] -> [a]
 tail'''' = recr (error "No tiene tail") (\x xs r -> xs)
+
+last'''' :: [a] -> a
+last'''' =
+  recr
+    (error "No tiene last")
+    ( \x xs r -> case xs of
+        [] -> x
+        _ -> r
+    )
+
+insert'''' :: Ord a => a -> [a] -> [a]
+insert'''' y = recr [] (\x xs r -> if y <= x then y : x : xs else x : r)
