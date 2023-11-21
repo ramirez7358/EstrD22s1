@@ -210,3 +210,129 @@ sacarNCapas n pz =
 -- 6
 
 -- length . capasQueCumplen f = cantidadDe f
+
+-- 7 definir por recursion estructural explicita
+
+map''' :: (a -> b) -> [a] -> [b]
+map''' f [] = []
+map''' f (x : xs) = f x : map''' f xs
+
+filter''' :: (a -> Bool) -> [a] -> [a]
+filter''' _ [] = []
+filter''' p (x : xs) =
+  if p x
+    then x : filter''' p xs
+    else filter''' p xs
+
+foldr''' :: (a -> b -> b) -> b -> [a] -> b
+foldr''' f z [] = z
+foldr''' f z (x : xs) = f x (foldr''' f z xs)
+
+recr''' :: b -> (a -> [a] -> b -> b) -> [a] -> b
+recr''' z f [] = z
+recr''' z f (x : xs) = f x xs (recr z f xs)
+
+foldr1''' :: (a -> a -> a) -> [a] -> a
+foldr1''' f [x] = x
+foldr1''' f (x : xs) = f x (foldr1''' f xs)
+
+zipWith''' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith''' _ [] ys = []
+zipWith''' _ xs [] = []
+zipWith''' f (x : xs) (y : ys) = f x y : zipWith''' f xs ys
+
+scanr''' :: (a -> b -> b) -> b -> [a] -> [b]
+scanr''' f y [] = [y]
+scanr''' f y (x : xs) = let rr = scanr''' f y xs in f x (head rr) : rr
+
+-- 9
+
+sum' :: [Int] -> Int
+sum' = foldr' (+) 0
+
+length' :: [a] -> Int
+length' = foldr' (\x acc -> 1 + acc) 0
+
+map'''' :: (a -> b) -> [a] -> [b]
+map'''' f = foldr' ((:) . f) []
+
+filter'''' :: (a -> Bool) -> [a] -> [a]
+filter'''' predicate = foldr' (\x r -> if predicate x then x : r else r) []
+
+find'''' :: (a -> Bool) -> [a] -> Maybe a
+find'''' p = foldr' (\x r -> if p x then Just x else r) Nothing
+
+any'''' :: (a -> Bool) -> [a] -> Bool
+any'''' p = foldr' ((||) . p) False
+
+all'''' :: (a -> Bool) -> [a] -> Bool
+all'''' p = foldr' ((&&) . p) True
+
+countBy'''' :: (a -> Bool) -> [a] -> Int
+countBy'''' p = foldr' (\x r -> if p x then 1 + r else r) 0
+
+partition'''' :: (a -> Bool) -> [a] -> ([a], [a])
+partition'''' p =
+  foldr
+    (\x (xs, ys) -> if p x then (x : xs, ys) else (xs, x : ys))
+    ([], [])
+
+zipWith'''' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith'''' f xs ys =
+  foldr'
+    g
+    (\_ -> []) -- const []
+    xs
+    ys
+  where
+    g x r [] = []
+    g x r (y : ys) = f x y : r ys
+
+-- Esta mal, pensarla mejor
+scanr'''' :: (a -> b -> b) -> b -> [a] -> [b]
+scanr'''' f y = foldr' g []
+                    where
+                        g x [] = [y]
+                        g x r = f x (head r) : r
+
+
+takeWhile'''' :: (a -> Bool) -> [a] -> [a]
+takeWhile'''' p = foldr' (\x r -> if p x then x : r else []) []
+
+
+take'''' :: Int -> [a] -> [a]
+take'''' n xs = foldr'
+                g
+                (const [])
+                xs
+                n
+            where
+                g x r 0 = []
+                g x r n = x : r (n -1)
+
+drop'''' :: Int -> [a] -> [a]
+drop'''' n xs = recr
+                    (const [])
+                    g
+                    xs
+                    n
+                where
+                    g x xs r 0 = x : xs
+                    g x xs r n = r (n - 1)
+
+b'''' :: Int -> [a] -> a
+b'''' n xs = foldr' 
+                g
+                (error "Index too large")
+                xs
+                n
+            where
+                g x r 0 = x
+                g x r n = r (n - 1)
+
+
+head'''' :: [a] -> a
+head'''' = foldr' const (error "no tiene head")                
+
+tail'''' :: [a] -> [a]
+tail'''' = recr (error "No tiene tail") (\x xs r -> xs)
