@@ -29,7 +29,7 @@ presentismos = filter' (null . losSarmiento)
 
 -- Funciones con foldr
 
-map'' f = foldr' (\e ep -> f e : ep) []
+map'' f = foldr' ((:) . f) []
 
 filter'' p = foldr' (\x -> if p x then (x :) else id) []
 

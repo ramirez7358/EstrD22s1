@@ -91,9 +91,14 @@ esCero (Prod e1 e2) = evalExpA e1 == 0 || evalExpA e2 == 0
 -- foldExpA f g h (Suma t1 t2) = g (foldExpA f g h t1) (foldExpA f g h t2)
 -- foldExpA f g h (Prod t1 t2) = h (foldExpA f g h t1) (foldExpA f g h t2)
 
-recExpA c s p (Cte x) = c x
-recExpA c s p (Suma t1 t2) = s t1 t2 (recExpA c s p t1) (recExpA c s p t2)
-recExpA c s p (Prod t1 t2) = p t1 t2 (recExpA c s p t1) (recExpA c s p t2)
+-- recExpA c s p (Cte x) = c x
+-- recExpA c s p (Suma t1 t2) = s t1 t2 (recExpA c s p t1) (recExpA c s p t2)
+-- recExpA c s p (Prod t1 t2) = p t1 t2 (recExpA c s p t1) (recExpA c s p t2)
+
+recExpA :: (Int -> b) -> (ExpA -> ExpA -> b -> b -> b) -> (ExpA -> ExpA -> b -> b -> b) -> ExpA -> b
+recExpA fcte fsuma fprod (Cte x) = fcte x
+recExpA fcte fsuma fprod (Suma t1 t2) = fsuma t1 t2 (recExpA fcte fsuma fprod t1) (recExpA fcte fsuma fprod t2)
+recExpA fcte fsuma fprod (Prod t1 t2) = fprod t1 t2 (recExpA fcte fsuma fprod t1) (recExpA fcte fsuma fprod t2)
 
 -- que describe la cantidad de constructores de suma con al menos uno de sus hijos constante cero
 cantDeSumaCeros :: ExpA -> Int
@@ -186,9 +191,8 @@ recT c s (NodeT x e1 e2) = c x e1 e2 (recT c s e1) (recT c s e2)
 
 
 mapT :: (a -> b) -> Tree a -> Tree b
-mapT f = foldT s c
+mapT f = foldT EmptyT c
   where
-    s = s
     c x = NodeT (f x)
 
 sumT :: Tree Int -> Int
@@ -242,7 +246,7 @@ partitionT p = foldT ([], []) c
             else (p1, x : p2)
 
 zipWithT :: (a -> b -> c) -> Tree a -> Tree b -> Tree c
-zipWithT f t1 t2 = foldT s c t1 t2
+zipWithT f = foldT s c
   where
     s _ = EmptyT
     c x r1 r2 (NodeT y yr1 yr2) = NodeT (f x y) (r1 yr1) (r2 yr2)
@@ -283,3 +287,59 @@ nivelN t n = foldT s c t n
 
 tree1 = NodeT 1 (NodeT 2 EmptyT EmptyT) (NodeT 3 EmptyT EmptyT)
 tree2 = NodeT 4 (NodeT 5 EmptyT EmptyT) (NodeT 6 EmptyT EmptyT)
+
+
+data Color = AMARILLO | VERDE
+data Premio = 
+  OB        -- El premio es el valor de la ficha 
+  | IZQ     -- El premio es el valor de la ficha por el puntaje del hijo izquierdo
+  | DER     -- El premio es el valor de la ficha por el puntaje del hijo derecho
+  | IZQDER  -- El premio es el valor de la ficha por la suma del puntaje de ambos hijos
+data Jugador = BLANCO | NEGRO
+data Ficha = F Jugador Color Int
+data Treener = N Color Premio (Maybe Ficha) Treener Treener | H (Maybe Ficha)
+data Dir = Izq | Der
+data Jugada = J [Dir] Ficha
+
+-- El puntaje de un nodo es el valor de la ficha puesta mas el puntaje de sus dos hijos.
+-- Solo se calcula el puntaje de un nodo si es el jugador el que jugo, sino el puntaje es cero
+-- Los nodos hoja (los ultimos) siempre tienen el premio OB es decir su valor es solo el de la ficha
+-- Para que una jugada sea valida tiene que pasar lo siguiente:
+-- 1. El nodo tiene que tener el mismo color que la ficha jugada
+-- 2. El nodo en donde se pone la ficha de la jugada puede o no tener otra ficha.
+-- En caso de tener ficha la ficha a poner tiene que tener un numero mayor al de la ficha puesta.
+
+jugadaValida :: Jugada -> Treener -> Bool
+jugadaValida (J ds f) = jugadaValidaAux ds f
+
+-- Función auxiliar para navegar en el árbol y verificar la validez de la jugada
+jugadaValidaAux :: [Dir] -> Ficha -> Treener -> Bool
+jugadaValidaAux [] ficha (H mficha) = validaFicha mficha ficha
+jugadaValidaAux [] ficha (N col _ mficha _ _) = mismoColor (colorFicha ficha) col && validaFicha mficha ficha
+jugadaValidaAux (Izq:ds) ficha (N col _ _ izq _) = mismoColor (colorFicha ficha) col && jugadaValidaAux ds ficha izq
+jugadaValidaAux (Der:ds) ficha (N col _ _ _ der) = mismoColor (colorFicha ficha) col && jugadaValidaAux ds ficha der
+jugadaValidaAux _ _ _ = False
+
+-- Función auxiliar para verificar si la ficha a colocar es válida en el nodo actual
+validaFicha :: Maybe Ficha -> Ficha -> Bool
+validaFicha Nothing _ = True
+validaFicha (Just fichaExistente) fichaNueva = valorFicha fichaNueva > valorFicha fichaExistente
+
+mismoColor :: Color -> Color -> Bool
+mismoColor AMARILLO AMARILLO = True
+mismoColor VERDE VERDE = True
+mismoColor _ _ = False
+
+colorFicha :: Ficha -> Color
+colorFicha (F _ c _) = c
+
+valorFicha :: Ficha -> Int
+valorFicha (F _ _ n) = n
+
+foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treener -> b
+foldTR fh fn (H mf) = fh mf
+foldTR fh fn (N c p mf t1 t2) = fn c p mf (foldTR fh fn t1) (foldTR fh fn t2)
+
+recTR :: (Maybe Ficha -> b) -> (Treener -> Treener -> Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treener -> b
+recTR fh fn (H mf) = fh mf
+recTR fh fn (N c p mf t1 t2) = fn t1 t2 c p mf (recTR fh fn t1) (recTR fh fn t2)
