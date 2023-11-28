@@ -301,6 +301,8 @@ data Treener = N Color Premio (Maybe Ficha) Treener Treener | H (Maybe Ficha)
 data Dir = Izq | Der
 data Jugada = J [Dir] Ficha
 
+data ModRama =  NoOP | Mod (Dir, Premio) (Treener, ModRama)
+
 -- El puntaje de un nodo es el valor de la ficha puesta mas el puntaje de sus dos hijos.
 -- Solo se calcula el puntaje de un nodo si es el jugador el que jugo, sino el puntaje es cero
 -- Los nodos hoja (los ultimos) siempre tienen el premio OB es decir su valor es solo el de la ficha
