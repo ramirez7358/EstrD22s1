@@ -349,6 +349,21 @@ valorFicha (F _ _ n) = n
 
 puntaje :: Jugador -> Treeble -> Int
 puntaje j (H mf) = puntajeH j mf
+puntaje j (N c p mf t1 t2) = let pt1 = puntaje j t1
+                                 pt2 = puntaje j t2 in
+                              puntajeN j p mf pt1 pt2 + pt1 + pt2
+
+puntajeN :: Jugador -> Premio -> Maybe Ficha -> Int -> Int -> Int
+puntajeN j p Nothing pt1 pt2 = 0
+puntajeN j p (Just (F j' c n)) pt1 pt2 = if mismoJugador j j'
+                                          then puntajeNP p n pt1 pt2
+                                          else 0
+
+puntajeNP :: Premio -> Int -> Int -> Int -> Int
+puntajeNP B n pj1 pj2 = n 
+puntajeNP Izq n pj1 pj2 = n * pj1
+puntajeNP Der n pj1 pj2 = n * pj2
+puntajeNP IzqDer n pj1 pj2 = n * (pj1 + pj2)
 
 puntajeH :: Jugador -> Maybe Ficha -> Int
 puntajeH j Nothing = 0
