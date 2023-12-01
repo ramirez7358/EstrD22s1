@@ -291,17 +291,21 @@ tree2 = NodeT 4 (NodeT 5 EmptyT EmptyT) (NodeT 6 EmptyT EmptyT)
 
 data Color = AMARILLO | VERDE
 data Premio = 
-  OB        -- El premio es el valor de la ficha 
-  | IZQ     -- El premio es el valor de la ficha por el puntaje del hijo izquierdo
-  | DER     -- El premio es el valor de la ficha por el puntaje del hijo derecho
-  | IZQDER  -- El premio es el valor de la ficha por la suma del puntaje de ambos hijos
-data Jugador = BLANCO | NEGRO
+  B        -- El premio es el valor de la ficha 
+  | Izq     -- El premio es el valor de la ficha por el puntaje del hijo izquierdo
+  | Der     -- El premio es el valor de la ficha por el puntaje del hijo derecho
+  | IzqDer  -- El premio es el valor de la ficha por la suma del puntaje de ambos hijos
+data Jugador = Verde | Amarillo
 data Ficha = F Jugador Color Int
-data Treener = N Color Premio (Maybe Ficha) Treener Treener | H (Maybe Ficha)
-data Dir = Izq | Der
+data Treeble = N Color Premio (Maybe Ficha) Treeble Treeble | H (Maybe Ficha)
+data Dir = IZQ | DER
 data Jugada = J [Dir] Ficha
+-- Se modifica el nodo actual cambiando su color y premio por los dados y se continúa
+-- desde el hijo dado por la dirección con el resto de las modificaciones dadas
+data ModRama =  NoOP | PonerY (Color, Premio) (Dir, ModRama)
 
-data ModRama =  NoOP | Mod (Dir, Premio) (Treener, ModRama)
+hojaT :: Treeble
+hojaT = H Nothing
 
 -- El puntaje de un nodo es el valor de la ficha puesta mas el puntaje de sus dos hijos.
 -- Solo se calcula el puntaje de un nodo si es el jugador el que jugo, sino el puntaje es cero
@@ -311,21 +315,26 @@ data ModRama =  NoOP | Mod (Dir, Premio) (Treener, ModRama)
 -- 2. El nodo en donde se pone la ficha de la jugada puede o no tener otra ficha.
 -- En caso de tener ficha la ficha a poner tiene que tener un numero mayor al de la ficha puesta.
 
-jugadaValida :: Jugada -> Treener -> Bool
+jugadaValida :: Jugada -> Treeble -> Bool
 jugadaValida (J ds f) = jugadaValidaAux ds f
 
 -- Función auxiliar para navegar en el árbol y verificar la validez de la jugada
-jugadaValidaAux :: [Dir] -> Ficha -> Treener -> Bool
-jugadaValidaAux [] ficha (H mficha) = validaFicha mficha ficha
-jugadaValidaAux [] ficha (N col _ mficha _ _) = mismoColor (colorFicha ficha) col && validaFicha mficha ficha
-jugadaValidaAux (Izq:ds) ficha (N col _ _ izq _) = mismoColor (colorFicha ficha) col && jugadaValidaAux ds ficha izq
-jugadaValidaAux (Der:ds) ficha (N col _ _ _ der) = mismoColor (colorFicha ficha) col && jugadaValidaAux ds ficha der
-jugadaValidaAux _ _ _ = False
+jugadaValidaAux :: [Dir] -> Ficha -> Treeble -> Bool
+jugadaValidaAux [] ficha (H mficha) = validaFichaH mficha ficha
+jugadaValidaAux _ _ (H mf) = False
+jugadaValidaAux [] ficha (N col _ mficha _ _) = validarFichaN ficha col mficha
+jugadaValidaAux (d:ds) ficha (N col _ mf t1 t2) = case d of
+                                                  IZQ -> jugadaValidaAux ds ficha t1
+                                                  DER -> jugadaValidaAux ds ficha t2
 
 -- Función auxiliar para verificar si la ficha a colocar es válida en el nodo actual
-validaFicha :: Maybe Ficha -> Ficha -> Bool
-validaFicha Nothing _ = True
-validaFicha (Just fichaExistente) fichaNueva = valorFicha fichaNueva > valorFicha fichaExistente
+validaFichaH :: Maybe Ficha -> Ficha -> Bool
+validaFichaH Nothing _ = True
+validaFichaH (Just fichaExistente) fichaNueva = valorFicha fichaNueva > valorFicha fichaExistente
+
+validarFichaN :: Ficha -> Color -> Maybe Ficha -> Bool
+validarFichaN (F j c n) c' Nothing = mismoColor c c'
+validarFichaN (F j c n) c' (Just (F _ _ m)) = mismoColor c c' && n > m
 
 mismoColor :: Color -> Color -> Bool
 mismoColor AMARILLO AMARILLO = True
@@ -338,10 +347,31 @@ colorFicha (F _ c _) = c
 valorFicha :: Ficha -> Int
 valorFicha (F _ _ n) = n
 
-foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treener -> b
+puntaje :: Jugador -> Treeble -> Int
+puntaje j (H mf) = puntajeH j mf
+
+puntajeH :: Jugador -> Maybe Ficha -> Int
+puntajeH j Nothing = 0
+puntajeH j (Just (F j' _ n)) = if mismoJugador j j' then n else 0
+
+mismoJugador :: Jugador -> Jugador -> Bool
+mismoJugador Verde Verde = True
+mismoJugador Amarillo Amarillo = True
+mismoJugador _ _ = False
+
+foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treeble -> b
 foldTR fh fn (H mf) = fh mf
 foldTR fh fn (N c p mf t1 t2) = fn c p mf (foldTR fh fn t1) (foldTR fh fn t2)
 
-recTR :: (Maybe Ficha -> b) -> (Treener -> Treener -> Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treener -> b
+recTR :: (Maybe Ficha -> b) -> (Treeble -> Treeble -> Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treeble -> b
 recTR fh fn (H mf) = fh mf
 recTR fh fn (N c p mf t1 t2) = fn t1 t2 c p mf (recTR fh fn t1) (recTR fh fn t2)
+
+-- data ModRama =  NoOP | PonerY (Color, Premio) (Dir, ModRama)
+foldMR :: b -> (Color -> Premio -> Dir -> b -> b) -> ModRama -> b
+foldMR fno fpy NoOP = fno
+foldMR fno fpy (PonerY (c,p) (d,mr)) = fpy c p d (foldMR fno fpy mr)
+
+recMR :: b -> (Color -> Premio -> Dir -> ModRama -> b -> b) -> ModRama -> b
+recMR fno fpy NoOP = fno
+recMR fno fpy (PonerY (c,p) (d,mr)) = fpy c p d mr (recMR fno fpy mr)
