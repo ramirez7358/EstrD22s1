@@ -381,6 +381,16 @@ modifT (PonerY (c,p) (IZQ,is)) (N _ _ mf t1 t2) = N c p mf (modifT is t1) t2
 modifT (PonerY (c,p) (DER,is)) (H mf) = N c p mf hojaT (modifT is hojaT)
 modifT (PonerY (c,p) (DER,is)) (N _ _ mf t1 t2) = N c p mf t1 (modifT is t2)
 
+armarT :: [ModRama] -> Treeble
+armarT [] = hojaT
+armarT (mr:mrs) = modifT mr (armarT mrs)
+
+extenderT :: Treeble -> [Dir] -> [ModRama] -> Treeble
+externerT (H Nothing) [] = armarT
+extenderT (N c p mf t1 t2) (d:ds) mrs = case d of
+                                          IZQ -> N c p mf (extenderT t1 ds mrs) t2
+                                          DER -> N c p mf t1 (extenderT t2 ds mrs)
+
 
 foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treeble -> b
 foldTR fh fn (H mf) = fh mf
