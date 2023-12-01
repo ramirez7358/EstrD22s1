@@ -374,6 +374,14 @@ mismoJugador Verde Verde = True
 mismoJugador Amarillo Amarillo = True
 mismoJugador _ _ = False
 
+modifT :: ModRama -> Treeble -> Treeble
+modifT NoOP t = t
+modifT (PonerY (c,p) (IZQ,is)) (H mf) = N c p mf (modifT is hojaT) hojaT
+modifT (PonerY (c,p) (IZQ,is)) (N _ _ mf t1 t2) = N c p mf (modifT is t1) t2
+modifT (PonerY (c,p) (DER,is)) (H mf) = N c p mf hojaT (modifT is hojaT)
+modifT (PonerY (c,p) (DER,is)) (N _ _ mf t1 t2) = N c p mf t1 (modifT is t2)
+
+
 foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treeble -> b
 foldTR fh fn (H mf) = fh mf
 foldTR fh fn (N c p mf t1 t2) = fn c p mf (foldTR fh fn t1) (foldTR fh fn t2)
