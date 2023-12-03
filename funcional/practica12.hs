@@ -391,7 +391,6 @@ extenderT (N c p mf t1 t2) (d:ds) mrs = case d of
                                           IZQ -> N c p mf (extenderT t1 ds mrs) t2
                                           DER -> N c p mf t1 (extenderT t2 ds mrs)
 
-
 foldTR :: (Maybe Ficha -> b) -> (Color -> Premio -> Maybe Ficha -> b -> b -> b) -> Treeble -> b
 foldTR fh fn (H mf) = fh mf
 foldTR fh fn (N c p mf t1 t2) = fn c p mf (foldTR fh fn t1) (foldTR fh fn t2)
