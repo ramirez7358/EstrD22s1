@@ -296,13 +296,13 @@ data Premio =
   | Der     -- El premio es el valor de la ficha por el puntaje del hijo derecho
   | IzqDer  -- El premio es el valor de la ficha por la suma del puntaje de ambos hijos
 data Jugador = Verde | Amarillo
-data Ficha = F !Jugador !Color !Int
-data Treeble = N !Color !Premio !(Maybe Ficha) !Treeble !Treeble | H (Maybe Ficha)
+data Ficha = F Jugador Color Int
+data Treeble = N Color Premio (Maybe Ficha) Treeble Treeble | H (Maybe Ficha)
 data Dir = IZQ | DER
-data Jugada = J ![Dir] !Ficha
+data Jugada = J [Dir] Ficha
 -- Se modifica el nodo actual cambiando su color y premio por los dados y se continúa
 -- desde el hijo dado por la dirección con el resto de las modificaciones dadas
-data ModRama =  NoOP | PonerY !(Color, Premio) !(Dir, ModRama)
+data ModRama =  NoOP | PonerY (Color, Premio) (Dir, ModRama)
 
 hojaT :: Treeble
 hojaT = H Nothing
