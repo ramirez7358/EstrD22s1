@@ -381,6 +381,8 @@ modifT (PonerY (c,p) (IZQ,is)) (N _ _ mf t1 t2) = N c p mf (modifT is t1) t2
 modifT (PonerY (c,p) (DER,is)) (H mf) = N c p mf hojaT (modifT is hojaT)
 modifT (PonerY (c,p) (DER,is)) (N _ _ mf t1 t2) = N c p mf t1 (modifT is t2)
 
+modifTF
+
 armarT :: [ModRama] -> Treeble
 armarT [] = hojaT
 armarT (mr:mrs) = modifT mr (armarT mrs)
