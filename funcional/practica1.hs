@@ -4,6 +4,8 @@
 -- doble (4 - 2)
 -- cuadruple (2 - 1)
 
+suma x y = x + y
+
 doble x = x + x
 
 cuadruple x = 4 * x
@@ -84,3 +86,23 @@ twiceTwiceL = (\f -> (\x -> (f(f(f(f x))))))
 -- f (x,y) = let z = x + y in g (z,y) where g (a,b) = a - b --> \x, y -> x
 -- f p = case p of (x,y) -> x --> \(x, y) -> x
 -- f = \p -> let (x,y) = p in y --> f = \(x, y) -> y
+
+sumar x = g where g y = x + y
+const' x = g where g y = x
+subst f = h
+    where
+    h g = k
+        where k x = (f x) (g x)
+
+apply f = g
+    where g x = f x
+
+first (x,y) = x
+second (x,y) = y
+
+swap (x,y) = (y, x)
+
+uflip f = g
+    where g p = f (swap p)
+
+a = apply suma
